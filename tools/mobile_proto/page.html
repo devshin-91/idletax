@@ -1,0 +1,484 @@
+<title>StallMeter Mobile</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<style>
+/* Layout: one phone-width app column (max 430px) with a fixed bottom menu, like the Figma "StallMeter Mobile" screens.
+   Colors are the Figma variable collection "StallMeter" (light) plus a matching dark set. */
+:root {
+  --bg: #F5F6F8; --surface: #FFFFFF; --surface-muted: #EEF0F3;
+  --text: #1F2328; --text-muted: #6B7280; --text-faint: #A3A8AF; --border: #E3E6EA;
+  --accent: #2563EB; --accent-soft: #E6EEFF; --on-accent: #FFFFFF;
+  --danger: #C62828; --danger-soft: #FDECEA; --success: #2E7D32; --success-soft: #E6F4EA;
+  --missed: #F7CDC9; --warning-soft: #FFF6D6; --warning-border: #ECDCA0; --scrim: rgba(17, 20, 24, .45);
+  --font: "Noto Sans KR", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif;
+  --r-sm: 8px; --r-md: 12px; --r-lg: 16px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #111418; --surface: #1A1E24; --surface-muted: #232831;
+  --text: #E8EAED; --text-muted: #9AA1AB; --text-faint: #6B7380; --border: #2C323B;
+  --accent: #6B9BF2; --accent-soft: #1D2A44; --on-accent: #0E1320;
+  --danger: #F07A7A; --danger-soft: #3A1F22; --success: #5DBB77; --success-soft: #1C3324;
+  --missed: #5A2C2C; --warning-soft: #322C1A; --warning-border: #6B5A2A; --scrim: rgba(0, 0, 0, .6);
+  color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #111418; --surface: #1A1E24; --surface-muted: #232831;
+  --text: #E8EAED; --text-muted: #9AA1AB; --text-faint: #6B7380; --border: #2C323B;
+  --accent: #6B9BF2; --accent-soft: #1D2A44; --on-accent: #0E1320;
+  --danger: #F07A7A; --danger-soft: #3A1F22; --success: #5DBB77; --success-soft: #1C3324;
+  --missed: #5A2C2C; --warning-soft: #322C1A; --warning-border: #6B5A2A; --scrim: rgba(0, 0, 0, .6);
+  color-scheme: dark; }
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--text); font: 400 14px/1.5 var(--font); -webkit-text-size-adjust: 100%; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+* { box-sizing: border-box; }
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.num { font-variant-numeric: tabular-nums; }
+
+.app { max-width: 430px; margin: 0 auto; min-height: 100%; position: relative;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 12px calc(96px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 16px; }
+h1 { font-size: 24px; line-height: 1.3; font-weight: 700; margin: 0; text-wrap: balance; }
+h2 { font-size: 16px; font-weight: 700; margin: 0; }
+.sub { color: var(--text-muted); font-size: 13px; margin: 2px 0 0; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 16px; }
+.stack { display: flex; flex-direction: column; gap: 12px; }
+.row { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.grow { flex: 1; min-width: 0; }
+.muted { color: var(--text-muted); } .faint { color: var(--text-faint); } .danger { color: var(--danger); }
+.label { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+.small { font-size: 12px; }
+
+/* summary tiles */
+.tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.tile { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 14px 16px; }
+.tile b { display: block; font-size: clamp(15px, 5.6vw, 22px); font-weight: 700; line-height: 1.3; margin-top: 4px; white-space: nowrap; }
+.tile.hot b { color: var(--danger); }
+
+.banner { background: var(--warning-soft); border: 1px solid var(--warning-border); border-radius: var(--r-md);
+  padding: 10px 14px; font-size: 13px; display: flex; gap: 12px; align-items: center; }
+.link { background: none; border: 0; padding: 4px 0; color: var(--accent); font-weight: 500; font-size: 13px; white-space: nowrap; }
+
+.chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin-inline: -4px; padding: 2px 4px; }
+.chips::-webkit-scrollbar { display: none; }
+.chip { border: 1px solid var(--border); background: var(--surface); border-radius: 999px; padding: 6px 14px; white-space: nowrap; font-weight: 500; }
+.chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+
+.list { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); overflow: hidden; }
+.item { display: flex; gap: 12px; align-items: center; width: 100%; text-align: left; background: none; border: 0;
+  padding: 14px 16px; border-top: 1px solid var(--border); }
+.item:first-child { border-top: 0; }
+.badge { width: 36px; height: 36px; flex: none; border-radius: 10px; display: grid; place-items: center; font-weight: 700;
+  background: var(--surface-muted); color: var(--text-muted); }
+.item.alert .badge { background: var(--danger-soft); color: var(--danger); }
+.item .t { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.item .m { font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.item .v { text-align: right; flex: none; }
+.item .v b { display: block; font-weight: 700; }
+.item.alert .v b, .item.alert .v .w { color: var(--danger); }
+.item.closed { opacity: .6; }
+.w { font-size: 12px; color: var(--text-muted); }
+
+.fab { position: fixed; right: max(16px, calc(50% - 215px + 16px), env(safe-area-inset-right, 0px));
+  bottom: calc(84px + env(safe-area-inset-bottom, 0px)); width: 56px; height: 56px; border-radius: 50%; border: 0;
+  background: var(--accent); color: var(--on-accent); font-size: 28px; line-height: 1; box-shadow: 0 6px 16px rgba(0,0,0,.2); z-index: 5; }
+
+nav.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; background: var(--surface); border-top: 1px solid var(--border);
+  padding-bottom: env(safe-area-inset-bottom, 0px); padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-area-inset-right, 0px); }
+nav.tabs > div { max-width: 430px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); }
+nav.tabs button { background: none; border: 0; padding: 8px 0 10px; display: flex; flex-direction: column; align-items: center; gap: 2px;
+  font-size: 11px; color: var(--text-faint); font-weight: 500; }
+nav.tabs button[aria-current="page"] { color: var(--accent); }
+nav.tabs svg { width: 24px; height: 24px; }
+
+/* check */
+.bar { height: 8px; border-radius: 999px; background: var(--surface-muted); overflow: hidden; }
+.bar > i { display: block; height: 100%; background: var(--success); border-radius: inherit; transition: width .25s ease; }
+.bar.blue > i { background: var(--accent); } .bar.red > i { background: var(--danger); }
+.check { display: flex; gap: 12px; align-items: center; background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-lg); padding: 12px 12px 12px 16px; }
+.check .name { background: none; border: 0; padding: 0; text-align: left; flex: 1; min-width: 0; }
+.check .name b { display: block; font-weight: 500; }
+.tog { width: 44px; height: 44px; flex: none; border-radius: 50%; border: 2px solid var(--border); background: var(--surface);
+  display: grid; place-items: center; color: transparent; transition: background .15s, border-color .15s; }
+.tog[aria-pressed="true"] { background: var(--success); border-color: var(--success); color: #fff; }
+.tog:disabled { opacity: .4; cursor: not-allowed; }
+.tog svg { width: 22px; height: 22px; }
+
+/* detail */
+.topbar { display: flex; align-items: center; gap: 8px; }
+.icon-btn { width: 40px; height: 40px; border: 0; background: none; border-radius: 10px; display: grid; place-items: center; margin-left: -8px; }
+.icon-btn svg { width: 24px; height: 24px; }
+.price { font-size: 20px; font-weight: 700; }
+.cal-head { display: flex; align-items: center; justify-content: space-between; }
+.cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; text-align: center; }
+.cal .wd { font-size: 12px; color: var(--text-muted); padding-bottom: 2px; }
+.day { aspect-ratio: 1; max-width: 100%; border-radius: 10px; border: 0; background: none; font-weight: 500; display: grid; place-items: center; padding: 0; }
+.day.used { background: var(--success); color: #fff; }
+.day.missed { background: var(--missed); color: var(--danger); }
+.day.today { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+.day.off { color: var(--text-faint); cursor: default; }
+.day:disabled { cursor: default; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12px; color: var(--text-muted); }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 4px; vertical-align: -1px; }
+.btn { border: 0; border-radius: var(--r-md); padding: 14px 16px; font-weight: 700; width: 100%; }
+.btn.primary { background: var(--accent); color: var(--on-accent); }
+.btn.primary[aria-pressed="true"] { background: var(--success); }
+.btn.soft-danger { background: var(--danger-soft); color: var(--danger); }
+.btn.ghost { background: var(--surface-muted); color: var(--text); }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+
+/* sheet / dialog */
+.overlay { position: fixed; inset: 0; z-index: 20; background: var(--scrim); display: flex; align-items: flex-end; justify-content: center; }
+.sheet { background: var(--surface); width: 100%; max-width: 430px; max-height: 92%; overflow-y: auto; border-radius: 20px 20px 0 0;
+  padding: 8px max(16px, env(safe-area-inset-right, 0px)) calc(20px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+  display: flex; flex-direction: column; gap: 14px; }
+.grip { width: 40px; height: 4px; border-radius: 2px; background: var(--border); margin: 0 auto 4px; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field > span { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+.input { border: 1px solid var(--border); background: var(--surface); border-radius: var(--r-md); padding: 12px 14px; width: 100%; min-width: 0; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; background: var(--surface-muted); border-radius: var(--r-md); padding: 4px; gap: 4px; }
+.seg button { border: 0; background: none; border-radius: 9px; padding: 8px 4px; font-weight: 500; color: var(--text-muted); }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--text); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+.seg button:disabled { opacity: .5; cursor: not-allowed; }
+.stepper { display: flex; align-items: center; gap: 8px; }
+.stepper button { width: 40px; height: 40px; border: 0; border-radius: 10px; background: var(--surface-muted); font-size: 18px; }
+.stepper b { min-width: 36px; text-align: center; font-size: 16px; }
+.note { border-radius: var(--r-md); padding: 12px 14px; font-size: 13px; background: var(--danger-soft); color: var(--danger); }
+.note.ok { background: var(--accent-soft); color: var(--text); }
+.dialog { background: var(--surface); width: calc(100% - 48px); max-width: 360px; border-radius: var(--r-lg); padding: 20px; margin: auto;
+  display: flex; flex-direction: column; gap: 16px; }
+.overlay.center { align-items: center; }
+.dialog .two { gap: 8px; }
+
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(150px + env(safe-area-inset-bottom, 0px)); z-index: 30;
+  background: var(--text); color: var(--bg); padding: 12px 16px; border-radius: var(--r-md); width: min(398px, calc(100% - 32px));
+  box-shadow: 0 6px 16px rgba(0,0,0,.2); font-weight: 500; }
+
+.settings { display: flex; flex-direction: column; gap: 6px; }
+.settings h3 { font-size: 12px; color: var(--text-muted); font-weight: 500; margin: 10px 0 2px; }
+.srow { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-top: 1px solid var(--border); background: none; border-left: 0; border-right: 0; border-bottom: 0; width: 100%; text-align: left; }
+.srow:first-child { border-top: 0; }
+.switch { width: 51px; height: 31px; border-radius: 999px; border: 0; padding: 2px; background: var(--text-faint); display: flex; transition: background .15s; flex: none; }
+.switch::after { content: ""; width: 27px; height: 27px; border-radius: 50%; background: #fff; transition: transform .15s; }
+.switch[aria-checked="true"] { background: var(--success); }
+.switch[aria-checked="true"]::after { transform: translateX(20px); }
+
+.empty { text-align: center; padding: 40px 8px; display: flex; flex-direction: column; gap: 12px; align-items: center; }
+.empty p { margin: 0; color: var(--text-muted); white-space: pre-line; max-width: 34ch; }
+.loading { min-height: 70vh; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 12px; text-align: center; }
+.loading .bar { width: 200px; }
+details summary { cursor: pointer; color: var(--text-muted); font-size: 13px; }
+details p { font-size: 13px; color: var(--text-muted); margin: 8px 0 0; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="app" id="app"><div class="loading" id="loading">
+  <h1>StallMeter</h1>
+  <p class="muted" id="load-text">앱 엔진(core.py)을 불러오는 중입니다. 처음에는 13MB쯤 받습니다.</p>
+  <div class="bar blue"><i id="load-bar" style="width:10%"></i></div>
+</div></div>
+<button class="fab" id="fab" hidden aria-label="구독 추가">+</button>
+<nav class="tabs" id="nav" hidden><div>
+  <button data-view="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1z"/></svg>홈</button>
+  <button data-view="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="m8.5 12.2 2.4 2.4 4.6-4.8"/></svg>오늘 체크</button>
+  <button data-view="report"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 20V12M10 20V6M15 20v-9M20 20V9M3 20.5h18"/></svg>보고서</button>
+  <button data-view="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>설정</button>
+</div></nav>
+<div id="layer"></div>
+
+<script src="pyodide/pyodide.js"></script>
+<script>
+"use strict";
+const KEY = "stallmeter-mobile-proto";
+const PATH = "/home/pyodide/stallmeter-data.json";
+const FIGMA_NOW = "2026-11-19T12:00:00";
+const WD = ["월", "화", "수", "목", "금", "토", "일"];
+const $ = (s, el = document) => el.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const prefs = { get(k, d) { try { const v = localStorage.getItem(KEY + ":" + k); return v === null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(KEY + ":" + k, JSON.stringify(v)); } catch {} } };
+
+let py, B;
+const ui = { view: "home", tab: "", closed: false, period: "year", detail: null, ym: null, notify: prefs.get("notify", true),
+  clock: prefs.get("clock", "real") };
+
+function nowIso() {
+  if (ui.clock === "figma") return FIGMA_NOW;
+  const d = new Date(), p = n => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}:00`;
+}
+function call(name, ...args) { return JSON.parse(B[name](...args)); }
+function persist() { try { localStorage.setItem(KEY, py.FS.readFile(PATH, { encoding: "utf8" })); } catch {} }
+function act(name, ...args) { const r = call(name, ...args); persist(); return r; }
+function koDate(iso) { const d = new Date(iso + "T00:00:00"); return `${d.getMonth() + 1}월 ${d.getDate()}일 ${WD[(d.getDay() + 6) % 7]}요일`; }
+
+async function boot() {
+  const bar = $("#load-bar"), text = $("#load-text");
+  try {
+    const base = new URL("./", location.href).href;
+    // The standard library is published as base64 text (Artifacts do not serve .zip); hand Pyodide the bytes.
+    const b64 = await fetch(base + "pyodide/python_stdlib.zip.b64.txt");
+    if (!b64.ok) throw new Error("python_stdlib " + b64.status);
+    const raw = atob(await b64.text()), stdlib = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i++) stdlib[i] = raw.charCodeAt(i);
+    bar.style.width = "35%";
+    const realFetch = window.fetch.bind(window), stdUrl = base + "pyodide/python_stdlib.zip";
+    window.fetch = (input, init) => String(input) === stdUrl
+      ? Promise.resolve(new Response(stdlib, { headers: { "Content-Type": "application/octet-stream" } }))
+      : realFetch(input, init);
+    py = await loadPyodide({ indexURL: base + "pyodide/", stdLibURL: stdUrl });
+    window.fetch = realFetch;
+    bar.style.width = "70%";
+    for (const f of ["core", "i18n", "bridge"]) {
+      const res = await fetch(base + "py/" + f + ".py.txt");
+      if (!res.ok) throw new Error(f + ".py " + res.status);
+      py.FS.writeFile("/home/pyodide/" + f + ".py", await res.text());
+    }
+    let saved = null; try { saved = localStorage.getItem(KEY); } catch {}
+    if (saved) py.FS.writeFile(PATH, saved);
+    py.runPython("import sys\nsys.path.insert(0, '/home/pyodide')");
+    B = py.pyimport("bridge");
+    const init = call("init");
+    bar.style.width = "100%";
+    $("#nav").hidden = false;
+    document.querySelectorAll("nav.tabs button").forEach(b => b.onclick = () => go(b.dataset.view));
+    $("#fab").onclick = openAdd;
+    if (init.broken) toast("저장된 데이터가 손상되어 있어 따로 두고 빈 상태로 시작했습니다.");
+    render();
+  } catch (e) {
+    text.textContent = "앱 엔진을 불러오지 못했습니다: " + e.message;
+    text.className = "danger";
+  }
+}
+
+function go(view) { ui.view = view; ui.detail = null; render(); scrollTo(0, 0); }
+function render() {
+  document.querySelectorAll("nav.tabs button").forEach(b => {
+    if (b.dataset.view === (ui.detail ? ui.from : ui.view)) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
+  });
+  const app = $("#app");
+  if (ui.detail) { app.innerHTML = viewDetail(); bindDetail(); $("#fab").hidden = true; return; }
+  const v = { home: viewHome, check: viewCheck, report: viewReport, settings: viewSettings }[ui.view];
+  app.innerHTML = v();
+  ({ home: bindHome, check: bindCheck, report: bindReport, settings: bindSettings })[ui.view]();
+  $("#fab").hidden = ui.view !== "home";
+}
+
+/* ---------- 홈 ---------- */
+function viewHome() {
+  const h = call("home", nowIso(), ui.tab, ui.closed);
+  if (h.empty) return `<header><h1>StallMeter</h1><p class="sub">미루고, 돈 내고 안 써서 잃는 돈</p></header>
+    <div class="empty card"><h2>아직 항목이 없습니다</h2>
+      <p>돈을 내고 있는 것을 추가하거나, 샘플을 불러와서 어떻게 동작하는지 보세요.\n샘플은 한 번 눌러서 다시 지울 수 있습니다.</p>
+      <button class="btn primary" id="add-first">+ 구독 추가</button><button class="btn ghost" id="sample">샘플 불러오기</button></div>`;
+  if (ui.tab && !h.tabs.includes(ui.tab)) ui.tab = "";
+  const tile = (k, label, hot) => `<div class="tile${hot ? " hot" : ""}"><span class="label">${label}</span><b class="num">${h.cards[k]}</b></div>`;
+  const rows = h.rows.map(r => `<button class="item${r.alert ? " alert" : ""}${r.open ? "" : " closed"}" data-id="${r.id}">
+      <span class="badge">${esc(r.initial)}</span>
+      <span class="grow"><span class="t" style="display:block">${esc(r.title)}</span><span class="m" style="display:block">${esc(r.tab)} · ${esc(r.price)}${r.open ? "" : " · 종료"}</span></span>
+      <span class="v num"><b>${r.year}</b><span class="w">${r.wasted ? "미사용 " + r.wasted : ""}</span></span></button>`).join("");
+  return `<header><h1>StallMeter</h1><p class="sub">미루고, 돈 내고 안 써서 잃는 돈</p></header>
+    ${h.sample ? `<div class="banner"><span class="grow">샘플 데이터입니다. 직접 넣은 항목은 건드리지 않습니다.</span><button class="link" id="clear">지우기</button></div>` : ""}
+    <div class="tiles">${tile("week", "이번 주")}${tile("month", "이번 달")}${tile("year", "올해", true)}${tile("total", "전체 기간")}</div>
+    <div class="chips" role="group" aria-label="탭">${["", ...h.tabs].map(t => `<button class="chip" data-tab="${esc(t)}" aria-pressed="${t === ui.tab}">${t ? esc(t) : "전체"}</button>`).join("")}</div>
+    <div class="row"><span class="label grow">올해 손실 큰 순</span>${h.closed_count ? `<button class="link" id="closed">${ui.closed ? "끝난 항목 숨기기" : "끝난 항목 보기"}</button>` : ""}</div>
+    ${rows ? `<div class="list">${rows}</div>` : `<p class="muted">이 탭에는 항목이 없습니다.</p>`}`;
+}
+function bindHome() {
+  $("#add-first")?.addEventListener("click", openAdd);
+  $("#sample")?.addEventListener("click", () => { act("load_sample", nowIso()); render(); toast("샘플을 불러왔습니다."); });
+  $("#clear")?.addEventListener("click", () => confirmBox("샘플을 지울까요? 직접 넣은 항목은 그대로 둡니다.", "지우기", () => { act("clear_sample"); render(); toast("샘플을 지웠습니다."); }));
+  $("#closed")?.addEventListener("click", () => { ui.closed = !ui.closed; render(); });
+  document.querySelectorAll(".chip").forEach(c => c.onclick = () => { ui.tab = c.dataset.tab; render(); });
+  // re-rendering resets the chip row to its start; bring the chosen tab back into view
+  const chosen = document.querySelector('.chip[aria-pressed="true"]'), row = chosen?.parentElement;
+  if (row && chosen.offsetLeft + chosen.offsetWidth > row.clientWidth) row.scrollLeft = chosen.offsetLeft - 8;
+  document.querySelectorAll(".item").forEach(r => r.onclick = () => openDetail(+r.dataset.id));
+}
+
+/* ---------- 오늘 체크 ---------- */
+const CHECK_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 12.5 4 4 8-9"/></svg>`;
+function viewCheck() {
+  const c = call("check", nowIso());
+  const pct = c.goal ? Math.min(100, c.used / c.goal * 100) : 0;
+  const rows = c.rows.map(r => `<div class="check"><button class="name" data-id="${r.id}"><b>${esc(r.title)}</b>
+      <span class="small ${r.missed ? "danger" : "muted"}">이번 주 ${r.used}/${r.goal}일${r.missed ? ` · 이미 ${r.missed}일 빠짐 (${r.missed_cost})` : ""}</span></button>
+      <button class="tog" data-use="${r.id}" aria-pressed="${r.today}" ${r.can ? "" : "disabled"} aria-label="${esc(r.title)} 오늘 사용함">${CHECK_SVG}</button></div>`).join("");
+  return `<header><h1>오늘 체크</h1><p class="sub">${koDate(c.date)} · 오늘 쓴 것을 누르세요</p></header>
+    ${c.rows.length ? `<div class="card stack"><div class="row"><span class="grow" style="font-weight:500">이번 주 목표 <span class="num">${c.used}/${c.goal}일</span></span>
+      <span class="danger small num" style="font-weight:500">이번 주 손실 ${c.week_loss}</span></div><div class="bar"><i style="width:${pct}%"></i></div></div>
+      <div class="stack">${rows}</div>` : `<div class="empty card"><p>체크할 구독이 없습니다. 홈에서 구독을 추가하세요.</p></div>`}`;
+}
+function bindCheck() {
+  document.querySelectorAll(".tog").forEach(b => b.onclick = () => {
+    const today = nowIso().slice(0, 10);
+    act("toggle_day", nowIso(), +b.dataset.use, today); render();
+  });
+  document.querySelectorAll(".check .name").forEach(b => b.onclick = () => openDetail(+b.dataset.id));
+}
+
+/* ---------- 상세 ---------- */
+function openDetail(id) {
+  const n = nowIso();
+  ui.detail = id; ui.ym = [+n.slice(0, 4), +n.slice(5, 7)]; ui.from = ui.view; render(); scrollTo(0, 0);
+}
+function viewDetail() {
+  const d = call("detail", nowIso(), ui.detail, ui.ym[0], ui.ym[1]);
+  const L = (k, label) => `<div class="tile"><span class="label">${label}</span><b class="num">${d.losses[k]}</b></div>`;
+  const cells = Array(d.lead).fill(`<span></span>`).concat(d.cells.map(c =>
+    `<button class="day ${c.state}" data-iso="${c.iso}" ${c.can ? "" : "disabled"} aria-label="${c.iso} ${({ used: "사용함", missed: "빠진 날", today: "오늘", open: "안 씀", off: "이용 기간 밖" })[c.state]}">${c.day}</button>`)).join("");
+  const wr = d.wasted_ratio == null ? 0 : d.wasted_ratio * 100;
+  return `<div class="topbar"><button class="icon-btn" id="back" aria-label="뒤로"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg></button><h1 class="grow" style="font-size:20px">${esc(d.title)}</h1></div>
+    <div class="card stack"><div><div class="price num">${esc(d.price)}</div><p class="sub">${esc(d.tab)} · ${esc(d.goal)} · ${esc(d.term)}${d.ended ? " · " + esc(d.ended) : ""}</p></div>
+      ${d.installment ? `<div class="stack" style="gap:6px"><div class="bar blue"><i style="width:${d.installment.ratio * 100}%"></i></div><span class="small muted">${esc(d.installment.text)}</span></div>` : ""}
+      <span class="small muted">하루 빠지면 약 <b class="num">${d.missed_day_cost}</b>을 잃습니다.</span></div>
+    <div class="tiles">${L("week", "이번 주")}${L("month", "이번 달")}${L("year", "올해")}${L("total", "전체 기간")}</div>
+    <div class="card stack"><div class="row"><span class="grow" style="font-weight:500">90일 미사용</span><b class="num">${d.wasted || "—"}</b></div>
+      <div class="bar red"><i style="width:${wr}%"></i></div>
+      <span class="small muted">${d.wasted ? "최근 90일 요금 중 목표를 못 채워 잃은 비율입니다. 50%를 넘으면 해지를 검토해 보세요." : "아직 지난 이용일이 없어 비율을 셀 수 없습니다."}</span></div>
+    <div class="card stack"><div class="cal-head"><button class="icon-btn" id="prev" aria-label="이전 달" style="margin:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m15 6-6 6 6 6"/></svg></button>
+      <h2 class="num">${d.year}년 ${d.month}월</h2><button class="icon-btn" id="next" aria-label="다음 달" style="margin:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m9 6 6 6-6 6"/></svg></button></div>
+      <div class="cal">${WD.map(w => `<span class="wd">${w}</span>`).join("")}${cells}</div>
+      <span class="small num" style="color:var(--success);font-weight:500">${esc(d.summary)}</span>
+      <div class="legend"><span><i style="background:var(--success)"></i>사용</span><span><i style="background:var(--missed)"></i>목표를 못 채운 날</span><span><i style="background:var(--accent-soft)"></i>오늘</span></div>
+      <span class="small muted">날짜를 누르면 사용함/안 함이 바뀝니다.</span></div>
+    <div class="stack">
+      <button class="btn primary" id="today" aria-pressed="${d.today_used}" ${d.today_can ? "" : "disabled"}>${d.today_used ? "오늘 사용함 ✓" : "오늘 사용함"}</button>
+      ${!d.fixed && d.open ? `<button class="btn soft-danger" id="cancel">해지했어요</button><span class="small muted" style="text-align:center">실제로 해지한 뒤 누르면 오늘 이후로는 손실을 세지 않습니다.</span>` : ""}
+      ${!d.fixed && !d.open ? `<button class="btn ghost" id="reopen">다시 열기</button>` : ""}
+      ${d.fixed ? `<span class="small muted">${esc(d.fixed_note)}</span>` : ""}
+      <button class="btn ghost" id="del">삭제</button></div>`;
+}
+function bindDetail() {
+  const d = call("detail", nowIso(), ui.detail, ui.ym[0], ui.ym[1]);
+  $("#back").onclick = () => { ui.detail = null; ui.view = ui.from || "home"; render(); };
+  const shift = k => { let [y, m] = ui.ym; m += k; if (m < 1) { m = 12; y--; } if (m > 12) { m = 1; y++; } ui.ym = [y, m]; render(); };
+  $("#prev").onclick = () => shift(-1); $("#next").onclick = () => shift(1);
+  document.querySelectorAll(".day:not(:disabled)").forEach(b => b.onclick = () => { act("toggle_day", nowIso(), ui.detail, b.dataset.iso); render(); });
+  $("#today").onclick = () => { act("toggle_day", nowIso(), ui.detail, nowIso().slice(0, 10)); render(); };
+  $("#cancel")?.addEventListener("click", () => confirmBox(d.confirm_cancel, "해지했어요", () => { act("cancel", nowIso(), ui.detail); render(); toast("종료했습니다."); }));
+  $("#reopen")?.addEventListener("click", () => { act("reopen", ui.detail); render(); });
+  $("#del").onclick = () => confirmBox(d.confirm_delete, "삭제", () => { act("delete", ui.detail); ui.detail = null; ui.view = ui.from || "home"; render(); toast("삭제했습니다."); });
+}
+
+/* ---------- 보고서 ---------- */
+const PERIODS = [["week", "이번 주"], ["month", "이번 달"], ["year", "올해"], ["total", "전체"]];
+function viewReport() {
+  const r = call("report", nowIso(), ui.period);
+  const label = Object.fromEntries(PERIODS)[ui.period];
+  const tabs = r.tabs.map((t, i) => `<div class="stack" style="gap:6px"><div class="row"><span class="grow">${esc(t.name)}</span><b class="num${t.ratio ? " danger" : ""}" style="font-weight:500">${t.value}</b></div>
+      <div class="bar ${i === 0 && t.ratio ? "red" : "blue"}"><i style="width:${t.ratio * 100}%"></i></div></div>`).join("");
+  const cands = r.candidates.map(c => `<button class="item alert" data-id="${c.id}"><span class="badge">${esc(c.initial)}</span>
+      <span class="grow"><span class="t" style="display:block">${esc(c.title)}</span><span class="m" style="display:block">${esc(c.tab)} · ${esc(c.price)}</span></span>
+      <span class="v num"><b>${c.loss}</b><span class="w">미사용 ${c.wasted}</span></span></button>`).join("");
+  return `<header><h1>보고서</h1></header>
+    <div class="seg" role="group" aria-label="기간">${PERIODS.map(([k, l]) => `<button data-p="${k}" aria-pressed="${k === ui.period}">${l}</button>`).join("")}</div>
+    <div class="card"><span class="label">${label} 잃은 돈</span><div class="price num danger" style="font-size:28px">${r.sum}</div>
+      <p class="sub">구독 ${r.count}개 기준. 매일 체크를 빠뜨리지 않을수록 정확합니다.</p></div>
+    ${r.tabs.length ? `<div class="card stack"><h2>탭별 손실</h2>${tabs}</div>` : ""}
+    <div class="stack"><div><h2>해지 후보</h2><p class="sub">최근 90일 요금의 절반 넘게 쓰지 않은 구독입니다.</p></div>
+      ${cands ? `<div class="list">${cands}</div>` : `<p class="muted">지금은 없습니다.</p>`}</div>
+    <details class="card"><summary>손실 계산 방법</summary><p>${esc(r.formula)}</p></details>`;
+}
+function bindReport() {
+  document.querySelectorAll(".seg button").forEach(b => b.onclick = () => { ui.period = b.dataset.p; render(); });
+  document.querySelectorAll(".item").forEach(r => r.onclick = () => openDetail(+r.dataset.id));
+}
+
+/* ---------- 설정 ---------- */
+function viewSettings() {
+  const h = call("home", nowIso(), "", false), about = call("about");
+  return `<header><h1>설정</h1></header><div class="settings">
+    <h3>알림</h3><div class="list"><div class="srow"><span class="grow">매일 체크 알림<span class="small muted" style="display:block">오후 9:00에 오늘 쓴 것을 물어봅니다. 이 프로토타입은 실제 알림을 보내지 않습니다.</span></span>
+      <button class="switch" id="notify" role="switch" aria-checked="${ui.notify}" aria-label="매일 체크 알림"></button></div></div>
+    <h3>기준 시각</h3><div class="card stack"><div class="seg" role="group" aria-label="기준 시각">
+      <button data-clock="real" aria-pressed="${ui.clock === "real"}">지금 시각</button><button data-clock="figma" aria-pressed="${ui.clock === "figma"}">Figma 화면 시각</button></div>
+      <span class="small muted">Figma 화면 시각은 2026-11-19 (목) 12:00입니다. 그 시각에 샘플을 불러오면 Figma 화면과 같은 숫자가 나옵니다.</span></div>
+    <h3>데이터</h3><div class="list">
+      ${h.sample ? `<button class="srow danger" id="s-clear">샘플 지우기</button>` : `<button class="srow" id="s-load">샘플 불러오기</button>`}
+      <button class="srow danger" id="s-reset">모든 데이터 지우기</button></div>
+    <p class="small muted" style="margin:4px 4px 0">데이터는 이 브라우저에만 저장됩니다. 형식은 데스크톱 앱의 stallmeter-data.json과 같습니다.</p>
+    <h3>정보</h3><div class="list">
+      <div class="srow"><span class="grow">계산 엔진</span><span class="muted small num">core.py ${esc(about.version)} · Python ${esc(about.python)}</span></div>
+      <div class="srow"><span class="grow">통화</span><span class="muted">${esc(about.currency)}</span></div>
+      <div class="srow"><span class="grow">라이선스</span><span class="muted">MIT</span></div></div></div>`;
+}
+function bindSettings() {
+  $("#notify").onclick = e => { ui.notify = !ui.notify; prefs.set("notify", ui.notify); e.currentTarget.setAttribute("aria-checked", ui.notify); };
+  document.querySelectorAll("[data-clock]").forEach(b => b.onclick = () => { ui.clock = b.dataset.clock; prefs.set("clock", ui.clock); render(); });
+  $("#s-load")?.addEventListener("click", () => { act("load_sample", nowIso()); go("home"); toast("샘플을 불러왔습니다."); });
+  $("#s-clear")?.addEventListener("click", () => confirmBox("샘플을 지울까요? 직접 넣은 항목은 그대로 둡니다.", "지우기", () => { act("clear_sample"); render(); toast("샘플을 지웠습니다."); }));
+  $("#s-reset").onclick = () => confirmBox("직접 넣은 항목까지 모두 지울까요? 되돌릴 수 없습니다.", "모두 지우기", () => { act("reset"); go("home"); toast("모든 데이터를 지웠습니다."); });
+}
+
+/* ---------- 항목 추가 ---------- */
+const BILL = [["monthly", "매달", "월 요금"], ["yearly", "연간", "연 요금"], ["prepaid", "일시불", "총액"], ["installment", "할부", "총액"]];
+function openAdd() {
+  const opt = call("form_options");
+  const f = { title: "", category: ui.tab || opt.tabs[0] || "", billing: "monthly", amount: "", months: "12", start: nowIso().slice(0, 10), end: "", target: 3 };
+  const layer = $("#layer");
+  layer.innerHTML = `<div class="overlay" id="ov"><form class="sheet" id="form" novalidate aria-label="새 구독">
+    <div class="grip"></div><div class="row"><h1 class="grow" style="font-size:20px">새 구독</h1><button type="button" class="icon-btn" id="x" aria-label="닫기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div class="seg"><button type="button" aria-pressed="true">구독</button><button type="button" disabled title="모바일 프로토타입은 구독만 다룹니다">미결 사항</button></div>
+    <label class="field"><span>이름</span><input class="input" id="f-title" autocomplete="off" placeholder="헬스장, AI 요금제, 강의 사이트 등"></label>
+    <label class="field"><span>탭 (고르거나 새로 입력)</span><input class="input" id="f-category" list="f-tabs" autocomplete="off" value="${esc(f.category)}"><datalist id="f-tabs">${opt.tabs.map(t => `<option value="${esc(t)}">`).join("")}</datalist></label>
+    <div class="field"><span>내는 방식</span><div class="seg" id="f-billing">${BILL.map(([k, l]) => `<button type="button" data-b="${k}" aria-pressed="${k === f.billing}">${l}</button>`).join("")}</div></div>
+    <div class="two"><label class="field"><span id="amount-label">월 요금 (${esc(opt.currency)})</span><input class="input num" id="f-amount" inputmode="numeric" autocomplete="off" placeholder="0"></label>
+      <label class="field" id="months-wrap" hidden><span>할부 개월 수</span><input class="input num" id="f-months" inputmode="numeric" value="${f.months}"></label></div>
+    <div class="two"><label class="field"><span>시작일</span><input class="input num" id="f-start" type="date" value="${f.start}"></label>
+      <label class="field"><span id="end-label">종료일 (선택)</span><input class="input num" id="f-end" type="date"></label></div>
+    <div class="row"><span class="grow"><b>일주일에 쓰려는 날</b><span class="small muted" style="display:block">목표 안에서 쉰 날은 손실이 아닙니다</span></span>
+      <div class="stepper"><button type="button" id="minus" aria-label="하루 줄이기">−</button><b class="num" id="f-target">${f.target}일</b><button type="button" id="plus" aria-label="하루 늘리기">+</button></div></div>
+    <div class="note" id="preview" aria-live="polite"></div>
+    <button class="btn primary" type="submit">저장</button></form></div>`;
+  const close = () => { layer.innerHTML = ""; };
+  $("#x").onclick = close; $("#ov").onclick = e => { if (e.target.id === "ov") close(); };
+  const read = () => ({ title: $("#f-title").value, category: $("#f-category").value, billing: f.billing, amount: $("#f-amount").value,
+    months: f.billing === "installment" ? $("#f-months").value : "0", start: $("#f-start").value, end: $("#f-end").value, target: String(f.target) });
+  const update = () => {
+    const bl = BILL.find(b => b[0] === f.billing);
+    $("#amount-label").textContent = `${bl[2]} (${opt.currency})`;
+    $("#months-wrap").hidden = f.billing !== "installment";
+    $("#end-label").textContent = f.billing === "prepaid" ? "종료일 (필수)" : f.billing === "installment" ? "종료일 (비우면 할부 기간)" : "종료일 (선택)";
+    $("#f-target").textContent = f.target + "일";
+    const p = call("preview", nowIso(), JSON.stringify(read()));
+    const box = $("#preview");
+    box.className = "note" + (p.error ? "" : " ok");
+    box.textContent = p.error ? p.error : p.text + (f.billing === "installment" && !$("#f-end").value ? ` 이용 기간은 ${p.end}까지입니다.` : "");
+  };
+  document.querySelectorAll("#f-billing button").forEach(b => b.onclick = () => { f.billing = b.dataset.b;
+    document.querySelectorAll("#f-billing button").forEach(x => x.setAttribute("aria-pressed", x === b)); update(); });
+  $("#minus").onclick = () => { f.target = Math.max(1, f.target - 1); update(); };
+  $("#plus").onclick = () => { f.target = Math.min(7, f.target + 1); update(); };
+  $("#form").addEventListener("input", update);
+  $("#form").onsubmit = e => {
+    e.preventDefault();
+    const r = act("add", nowIso(), JSON.stringify(read()));
+    if (r.error) { const box = $("#preview"); box.className = "note"; box.textContent = r.error; return; }
+    close(); ui.tab = ""; ui.view = "home"; ui.detail = null; render(); toast(`저장했습니다: ${r.title}`);
+  };
+  update(); $("#f-title").focus();
+}
+
+/* ---------- 공통 ---------- */
+function confirmBox(message, okLabel, onOk) {
+  const layer = $("#layer");
+  layer.innerHTML = `<div class="overlay center" id="ov"><div class="dialog" role="alertdialog" aria-modal="true" aria-labelledby="cm"><p id="cm" style="margin:0">${esc(message)}</p>
+    <div class="two"><button class="btn ghost" id="no">취소</button><button class="btn soft-danger" id="yes">${esc(okLabel)}</button></div></div></div>`;
+  const close = () => { layer.innerHTML = ""; };
+  $("#no").onclick = close; $("#ov").onclick = e => { if (e.target.id === "ov") close(); };
+  $("#yes").onclick = () => { close(); onOk(); };
+  $("#no").focus();
+}
+let toastTimer;
+function toast(text) {
+  document.querySelector(".toast")?.remove();
+  const el = document.createElement("div"); el.className = "toast"; el.setAttribute("role", "status"); el.textContent = text;
+  document.body.appendChild(el); clearTimeout(toastTimer); toastTimer = setTimeout(() => el.remove(), 3000);
+}
+boot();
+</script>

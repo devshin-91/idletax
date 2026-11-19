@@ -1,0 +1,19 @@
+﻿# user data saved next to the executable
+stallmeter-data.json
+stallmeter-data.json.tmp
+data/
+
+# agent notes kept local (accounts, local paths, progress)
+CLAUDE.local.md
+PROGRESS.md
+
+# build output
+build/
+dist/
+*.spec
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
