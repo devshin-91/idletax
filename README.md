@@ -1,17 +1,17 @@
 **English** | [한국어](README.ko.md)
 
-# StallMeter
+# IdleTax
 
 Shows, in money, what you lose by not using what you pay for and by putting decisions off.
 
-![StallMeter main window](doc/images/main.png)
+![IdleTax main window](doc/images/main.png)
 
 ## Why I made this
 
 Getting rich quickly is hard. Losing less is something you can start today, but the loss is hard to see:
 a gym membership you stopped going to, a second AI plan you rarely open, a decision a team has waited on for weeks.
 None of these sends a bill for "money wasted".
-StallMeter turns each one into a number per week, month and year, so you can tell what to cancel and what to settle first.
+IdleTax turns each one into a number per week, month and year, so you can tell what to cancel and what to settle first.
 
 ## Features
 
@@ -29,7 +29,7 @@ StallMeter turns each one into a number per week, month and year, so you can tel
 
 ## Install
 
-There is no public release yet. Build it from source (below), then copy `dist\StallMeter.exe` anywhere and run it.
+There is no public release yet. Build it from source (below), then copy `dist\IdleTax.exe` anywhere and run it.
 The exe is not code-signed, so Windows SmartScreen may warn on first run: choose "More info" and then "Run anyway".
 
 ## Build from source
@@ -42,7 +42,7 @@ uv pip install --python .venv\Scripts\python.exe pyinstaller
 build.bat
 ```
 
-`build.bat` runs the unit tests, builds `dist\StallMeter.exe`, and runs the built exe once as a smoke test. It stops if any step fails.
+`build.bat` runs the unit tests, builds `dist\IdleTax.exe`, and runs the built exe once as a smoke test. It stops if any step fails.
 
 ## Usage
 

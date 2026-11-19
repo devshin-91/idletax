@@ -1,4 +1,4 @@
-"""Assembles the mobile prototype: the page, StallMeter's engine files and a Pyodide runtime in one folder.
+"""Assembles the mobile prototype: the page, IdleTax's engine files and a Pyodide runtime in one folder.
 
 Usage: python -X utf8 tools/build_mobile_proto.py <pyodide package folder> [out folder]
   <pyodide package folder>  the unpacked npm package pyodide@0.26.4 (the folder with pyodide.asm.wasm)

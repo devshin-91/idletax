@@ -1,4 +1,4 @@
-# StallMeter
+# IdleTax
 
 이 프로젝트는 `small-app-harness` 스킬의 공통 규칙을 따른다. 아래는 이 프로젝트에만 해당하는 내용이다.
 개인 정보(계정, 로컬 경로)는 `CLAUDE.local.md`, 진행 상태는 `PROGRESS.md`에 있다 (둘 다 gitignore).
@@ -15,7 +15,7 @@
 |---|---|
 | 테스트 | `.venv\Scripts\python.exe -X utf8 test_core.py` |
 | 소스로 실행 | `.venv\Scripts\python.exe app.py` |
-| 빌드 (테스트 포함) | `build.bat` → `dist\StallMeter.exe` |
+| 빌드 (테스트 포함) | `build.bat` → `dist\IdleTax.exe` |
 | 샘플 데이터 | `python -X utf8 tools\make_sample.py <폴더> [en\|ko]` |
 | 모바일 화면 프로토타입 | `python -X utf8 tools\build_mobile_proto.py <pyodide@0.26.4 npm 패키지 폴더>` → `build\mobile-proto\` (`page.html`은 Artifact용, `index.html`은 로컬 서버용) |
 
@@ -24,7 +24,8 @@
 
 ## 데이터
 
-- 사용자 데이터: `stallmeter-data.json` (exe 옆, gitignore). 버전 3. 버전 1·2 파일은 불러올 때 올린다.
+- 사용자 데이터: `idletax-data.json` (exe 옆, gitignore). 버전 3. 버전 1·2 파일은 불러올 때 올린다.
+- 앱 이름이 2026-11-20에 StallMeter에서 IdleTax로 바뀌었다. 옛 `stallmeter-data.json`과 `%APPDATA%\StallMeter`는 처음 켤 때 새 이름으로 옮긴다(`core.data_path`, 테스트가 확인). 모바일 프로토타입은 옛 localStorage 키를 옮긴다.
 - 항목은 `kind`가 `sub`(구독) 또는 `decision`(미결 사항)이다. 탭 목록은 `categories`에 따로 저장하고(빈 탭 가능), 항목의 `category`가 그 탭 이름이다.
 - 구독의 `billing`은 `monthly`, `yearly`, `prepaid`, `installment` 넷이다. `installment`만 `months`(할부 개월 수)를 쓴다.
 - 샘플 항목은 `sample: true`로 표시한다. 샘플 내용은 `i18n.SAMPLE`에 있고 `core.load_sample` / `clear_sample`이 넣고 뺀다.

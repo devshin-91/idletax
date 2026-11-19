@@ -1,4 +1,7 @@
 ﻿# user data saved next to the executable
+idletax-data.json
+idletax-data.json.tmp
+# the app's earlier name, renamed on first start
 stallmeter-data.json
 stallmeter-data.json.tmp
 data/

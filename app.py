@@ -1,4 +1,4 @@
-"""StallMeter window. All logic lives in core.py; all text lives in i18n.py."""
+"""IdleTax window. All logic lives in core.py; all text lives in i18n.py."""
 
 import calendar
 import os
@@ -752,12 +752,12 @@ class App:
     def export_report(self):
         now = datetime.now()
         text = core.report_markdown(self.data, now, self.t, self.tab_category)
-        self.export(text, f"stallmeter-report-{now:%Y-%m-%d}.md", ".md", "utf-8")
+        self.export(text, f"idletax-report-{now:%Y-%m-%d}.md", ".md", "utf-8")
 
     def export_csv(self):
         now = datetime.now()
         # utf-8-sig so Excel opens Korean text correctly
-        self.export(core.export_csv(self.data, now), f"stallmeter-{now:%Y-%m-%d}.csv", ".csv", "utf-8-sig")
+        self.export(core.export_csv(self.data, now), f"idletax-{now:%Y-%m-%d}.csv", ".csv", "utf-8-sig")
 
 
 def smoke(folder):

@@ -1,4 +1,4 @@
-"""Glue between the mobile prototype page and StallMeter's own engine (core.py, i18n.py), run in Pyodide.
+"""Glue between the mobile prototype page and IdleTax's own engine (core.py, i18n.py), run in Pyodide.
 
 Every number the page shows comes from a core.py function called here; this file only picks and formats them.
 Data lives in the same JSON format as the desktop app (core.load / core.save) at PATH in Pyodide's file system;
@@ -12,7 +12,7 @@ from datetime import date, datetime, timedelta
 import core
 import i18n
 
-PATH = "/home/pyodide/stallmeter-data.json"
+PATH = "/home/pyodide/idletax-data.json"
 LANG = "ko"
 t = i18n.translator(LANG)
 DATA = core.new_data()

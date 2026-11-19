@@ -1,17 +1,17 @@
 [English](README.md) | **한국어**
 
-# StallMeter
+# IdleTax
 
 돈 내고 안 쓰는 것과 미뤄 둔 결정 때문에 잃는 돈을 금액으로 보여 준다.
 
-![StallMeter 메인 창](doc/images/main.png)
+![IdleTax 메인 창](doc/images/main.png)
 
 ## 만든 이유
 
 당장 부자가 되기는 어렵다. 덜 잃는 것은 오늘부터 할 수 있는데, 그 손실이 눈에 잘 안 보인다.
 끊어 놓고 안 가는 헬스장, 거의 열지 않는 두 번째 AI 요금제, 팀이 몇 주째 기다리는 결정이 그렇다.
 어느 것도 "낭비한 돈" 청구서를 보내지 않는다.
-StallMeter는 이것들을 주·월·연 단위 금액으로 바꿔서, 무엇을 해지하고 무엇을 먼저 처리할지 판단할 근거를 준다.
+IdleTax는 이것들을 주·월·연 단위 금액으로 바꿔서, 무엇을 해지하고 무엇을 먼저 처리할지 판단할 근거를 준다.
 
 ## 기능
 
@@ -29,7 +29,7 @@ StallMeter는 이것들을 주·월·연 단위 금액으로 바꿔서, 무엇�
 
 ## 설치
 
-아직 공개 릴리스가 없다. 아래 방법으로 빌드한 뒤 `dist\StallMeter.exe`를 아무 곳에나 복사해서 실행한다.
+아직 공개 릴리스가 없다. 아래 방법으로 빌드한 뒤 `dist\IdleTax.exe`를 아무 곳에나 복사해서 실행한다.
 exe에 코드 서명이 없어서 처음 실행할 때 Windows SmartScreen 경고가 뜰 수 있다. "추가 정보"를 누른 뒤 "실행"을 고른다.
 
 ## 소스에서 빌드
@@ -42,7 +42,7 @@ uv pip install --python .venv\Scripts\python.exe pyinstaller
 build.bat
 ```
 
-`build.bat`은 단위 테스트를 돌리고, `dist\StallMeter.exe`를 만들고, 만든 exe를 한 번 실행해 스모크 테스트를 한다. 어느 단계든 실패하면 멈춘다.
+`build.bat`은 단위 테스트를 돌리고, `dist\IdleTax.exe`를 만들고, 만든 exe를 한 번 실행해 스모크 테스트를 한다. 어느 단계든 실패하면 멈춘다.
 
 ## 사용법
 

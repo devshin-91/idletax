@@ -1,13 +1,13 @@
-﻿# Runs the built exe as "StallMeter.exe --smoke <folder>" from an empty temp folder. The app does a small piece of its
+﻿# Runs the built exe as "IdleTax.exe --smoke <folder>" from an empty temp folder. The app does a small piece of its
 # real work there and returns exit code 0. On failure it can write the reason to <folder>\smoke.log.
 # A windowed exe that fails on startup shows a dialog and waits forever, so a time limit turns that into a failure.
 param([int]$TimeoutSeconds = 60)
 $ErrorActionPreference = "Stop"
 $root =Split-Path -Parent $PSScriptRoot
-$work = Join-Path $env:TEMP ("StallMeter_smoke_" + (Get-Random))
+$work = Join-Path $env:TEMP ("IdleTax_smoke_" + (Get-Random))
 New-Item -ItemType Directory -Force $work | Out-Null
-Copy-Item "$root\dist\StallMeter.exe" $work
-$p = Start-Process "$work\StallMeter.exe" -WorkingDirectory $work -ArgumentList "--smoke", "`"$work`"" -PassThru
+Copy-Item "$root\dist\IdleTax.exe" $work
+$p = Start-Process "$work\IdleTax.exe" -WorkingDirectory $work -ArgumentList "--smoke", "`"$work`"" -PassThru
 $code = 1
 if ($p.WaitForExit($TimeoutSeconds * 1000)) {
     $code = $p.ExitCode

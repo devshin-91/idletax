@@ -1,4 +1,4 @@
-"""StallMeter logic. No GUI imports; standard library only.
+"""IdleTax logic. No GUI imports; standard library only.
 
 Two kinds of item lose money while nothing happens:
 
@@ -15,8 +15,11 @@ import json
 import os
 from datetime import date, datetime, time, timedelta
 
-DATA_FILE = "stallmeter-data.json"
-APP_NAME = "StallMeter"
+DATA_FILE = "idletax-data.json"
+APP_NAME = "IdleTax"
+# The app was called StallMeter until 2026-11-20. Its data file and %APPDATA% folder are renamed on first start.
+LEGACY_DATA_FILE = "stallmeter-data.json"
+LEGACY_APP_NAME = "StallMeter"
 VERSION = "0.3.0"
 ZERO_DECIMAL_CURRENCIES = ("\u20a9", "\uc6d0", "\u00a5", "KRW", "JPY")
 # monthly:     a price every month, until cancelled
@@ -521,16 +524,35 @@ def delete(data, item_id):
     data["items"].remove(find(data, item_id))
 
 
-def data_path():
-    """Next to the exe (or this file). If that folder is read-only, %APPDATA%\\StallMeter."""
+def _in_folder(folder):
+    """The data file in `folder`. A file left there under the app's earlier name is renamed first."""
+    path = os.path.join(folder, DATA_FILE)
+    legacy = os.path.join(folder, LEGACY_DATA_FILE)
+    if not os.path.exists(path) and os.path.exists(legacy):
+        try:
+            os.replace(legacy, path)
+        except OSError:
+            return legacy
+    return path
+
+
+def data_path(base=None, appdata=None):
+    """Next to the exe (or this file). If that folder is read-only, %APPDATA%\\IdleTax."""
     import sys
-    base = os.path.dirname(sys.executable if getattr(sys, "frozen", False) else os.path.abspath(__file__))
-    path = os.path.join(base, DATA_FILE)
+    if base is None:
+        base = os.path.dirname(sys.executable if getattr(sys, "frozen", False) else os.path.abspath(__file__))
+    path = _in_folder(base)
     if os.access(path, os.W_OK) or (not os.path.exists(path) and os.access(base, os.W_OK)):
         return path
-    alt = os.path.join(os.environ.get("APPDATA", base), APP_NAME)
+    root = appdata or os.environ.get("APPDATA", base)
+    alt, legacy = os.path.join(root, APP_NAME), os.path.join(root, LEGACY_APP_NAME)
+    if not os.path.exists(alt) and os.path.isdir(legacy):
+        try:
+            os.replace(legacy, alt)
+        except OSError:
+            alt = legacy
     os.makedirs(alt, exist_ok=True)
-    return os.path.join(alt, DATA_FILE)
+    return _in_folder(alt)
 
 
 def _check_shape(data):

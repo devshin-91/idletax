@@ -4,7 +4,7 @@ LANGS = ("en", "ko")
 
 STRINGS = {
     "en": {
-        "app_title": "StallMeter",
+        "app_title": "IdleTax",
         "tagline": "What you lose by waiting and by not using what you pay for",
         "tab_all": "All",
         "btn_new_sub": "+ Subscription",
@@ -136,7 +136,7 @@ STRINGS = {
         "shortcuts": "Ctrl+N subscription  ·  Ctrl+Shift+N decision  ·  Ctrl+T tab  ·  Enter edit  ·  Ctrl+K calendar  ·  "
                      "Ctrl+U used today  ·  Ctrl+D end  ·  Del delete  ·  Ctrl+E report  ·  Ctrl+L language",
         "r_title": "Loss report",
-        "r_generated": "Generated {date} by StallMeter.",
+        "r_generated": "Generated {date} by IdleTax.",
         "r_week": "Lost this week: {cost}",
         "r_month": "Lost this month: {cost}",
         "r_year": "Lost this year: {cost}",
@@ -152,7 +152,7 @@ STRINGS = {
                      "stays open. All inputs are your own entries.",
     },
     "ko": {
-        "app_title": "StallMeter",
+        "app_title": "IdleTax",
         "tagline": "미루고, 돈 내고 안 써서 잃는 돈",
         "tab_all": "전체",
         "btn_new_sub": "+ 구독",
@@ -282,7 +282,7 @@ STRINGS = {
         "shortcuts": "Ctrl+N 구독  ·  Ctrl+Shift+N 미결 사항  ·  Ctrl+T 탭  ·  Enter 수정  ·  Ctrl+K 달력  ·  "
                      "Ctrl+U 오늘 사용함  ·  Ctrl+D 종료  ·  Del 삭제  ·  Ctrl+E 보고서  ·  Ctrl+L 언어",
         "r_title": "손실 보고서",
-        "r_generated": "{date} StallMeter로 작성.",
+        "r_generated": "{date} IdleTax로 작성.",
         "r_week": "이번 주 손실: {cost}",
         "r_month": "이번 달 손실: {cost}",
         "r_year": "올해 손실: {cost}",

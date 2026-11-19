@@ -401,6 +401,28 @@ class StorageTests(unittest.TestCase):
                 self.assertFalse(os.path.exists(path))
 
 
+    def test_data_file_from_the_old_name_is_kept(self):
+        # the app was called StallMeter; an update must not leave the user's data behind
+        with tempfile.TemporaryDirectory() as folder:
+            data = core.new_data()
+            core.add_sub(data, sub(title="old name"))
+            core.save(os.path.join(folder, core.LEGACY_DATA_FILE), data)
+            path = core.data_path(folder)
+            self.assertEqual(path, os.path.join(folder, core.DATA_FILE))
+            self.assertEqual(os.listdir(folder), [core.DATA_FILE])
+            self.assertEqual(core.load(path)[0]["items"][0]["title"], "old name")
+
+    def test_old_name_file_does_not_replace_a_current_one(self):
+        with tempfile.TemporaryDirectory() as folder:
+            for name, title in ((core.DATA_FILE, "current"), (core.LEGACY_DATA_FILE, "old")):
+                data = core.new_data()
+                core.add_sub(data, sub(title=title))
+                core.save(os.path.join(folder, name), data)
+            path = core.data_path(folder)
+            self.assertEqual(core.load(path)[0]["items"][0]["title"], "current")
+            self.assertTrue(os.path.exists(os.path.join(folder, core.LEGACY_DATA_FILE)))
+
+
 class ExportTests(unittest.TestCase):
     def setUp(self):
         self.data = core.new_data()

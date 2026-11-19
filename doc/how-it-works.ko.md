@@ -1,6 +1,6 @@
 [English](how-it-works.md) | **한국어**
 
-# StallMeter가 손실을 세는 방법
+# IdleTax가 손실을 세는 방법
 
 ## 구독
 

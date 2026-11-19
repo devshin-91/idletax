@@ -1,10 +1,10 @@
-<title>StallMeter Mobile</title>
+<title>IdleTax Mobile</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap">
 <style>
-/* Layout: one phone-width app column (max 430px) with a fixed bottom menu, like the Figma "StallMeter Mobile" screens.
-   Colors are the Figma variable collection "StallMeter" (light) plus a matching dark set. */
+/* Layout: one phone-width app column (max 430px) with a fixed bottom menu, like the Figma mobile screens.
+   Colors are the Figma color variables (light) plus a matching dark set. */
 :root {
   --bg: #F5F6F8; --surface: #FFFFFF; --surface-muted: #EEF0F3;
   --text: #1F2328; --text-muted: #6B7280; --text-faint: #A3A8AF; --border: #E3E6EA;
@@ -177,7 +177,7 @@ details p { font-size: 13px; color: var(--text-muted); margin: 8px 0 0; }
 </style>
 
 <div class="app" id="app"><div class="loading" id="loading">
-  <h1>StallMeter</h1>
+  <h1>IdleTax</h1>
   <p class="muted" id="load-text">앱 엔진(core.py)을 불러오는 중입니다. 처음에는 13MB쯤 받습니다.</p>
   <div class="bar blue"><i id="load-bar" style="width:10%"></i></div>
 </div></div>
@@ -193,12 +193,23 @@ details p { font-size: 13px; color: var(--text-muted); margin: 8px 0 0; }
 <script src="pyodide/pyodide.js"></script>
 <script>
 "use strict";
-const KEY = "stallmeter-mobile-proto";
-const PATH = "/home/pyodide/stallmeter-data.json";
+const KEY = "idletax-mobile-proto";
+const OLD_KEY = "stallmeter-mobile-proto"; // the app's earlier name; moved over once on start
+const PATH = "/home/pyodide/idletax-data.json";
 const FIGMA_NOW = "2026-11-19T12:00:00";
 const WD = ["월", "화", "수", "목", "금", "토", "일"];
 const $ = (s, el = document) => el.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+function adoptOldKeys() {
+  try {
+    for (const suffix of ["", ":notify", ":clock"]) {
+      const old = localStorage.getItem(OLD_KEY + suffix);
+      if (old !== null && localStorage.getItem(KEY + suffix) === null) localStorage.setItem(KEY + suffix, old);
+      if (old !== null) localStorage.removeItem(OLD_KEY + suffix);
+    }
+  } catch {}
+}
+adoptOldKeys();
 const prefs = { get(k, d) { try { const v = localStorage.getItem(KEY + ":" + k); return v === null ? d : JSON.parse(v); } catch { return d; } },
   set(k, v) { try { localStorage.setItem(KEY + ":" + k, JSON.stringify(v)); } catch {} } };
 
@@ -271,7 +282,7 @@ function render() {
 /* ---------- 홈 ---------- */
 function viewHome() {
   const h = call("home", nowIso(), ui.tab, ui.closed);
-  if (h.empty) return `<header><h1>StallMeter</h1><p class="sub">미루고, 돈 내고 안 써서 잃는 돈</p></header>
+  if (h.empty) return `<header><h1>IdleTax</h1><p class="sub">미루고, 돈 내고 안 써서 잃는 돈</p></header>
     <div class="empty card"><h2>아직 항목이 없습니다</h2>
       <p>돈을 내고 있는 것을 추가하거나, 샘플을 불러와서 어떻게 동작하는지 보세요.\n샘플은 한 번 눌러서 다시 지울 수 있습니다.</p>
       <button class="btn primary" id="add-first">+ 구독 추가</button><button class="btn ghost" id="sample">샘플 불러오기</button></div>`;
@@ -281,7 +292,7 @@ function viewHome() {
       <span class="badge">${esc(r.initial)}</span>
       <span class="grow"><span class="t" style="display:block">${esc(r.title)}</span><span class="m" style="display:block">${esc(r.tab)} · ${esc(r.price)}${r.open ? "" : " · 종료"}</span></span>
       <span class="v num"><b>${r.year}</b><span class="w">${r.wasted ? "미사용 " + r.wasted : ""}</span></span></button>`).join("");
-  return `<header><h1>StallMeter</h1><p class="sub">미루고, 돈 내고 안 써서 잃는 돈</p></header>
+  return `<header><h1>IdleTax</h1><p class="sub">미루고, 돈 내고 안 써서 잃는 돈</p></header>
     ${h.sample ? `<div class="banner"><span class="grow">샘플 데이터입니다. 직접 넣은 항목은 건드리지 않습니다.</span><button class="link" id="clear">지우기</button></div>` : ""}
     <div class="tiles">${tile("week", "이번 주")}${tile("month", "이번 달")}${tile("year", "올해", true)}${tile("total", "전체 기간")}</div>
     <div class="chips" role="group" aria-label="탭">${["", ...h.tabs].map(t => `<button class="chip" data-tab="${esc(t)}" aria-pressed="${t === ui.tab}">${t ? esc(t) : "전체"}</button>`).join("")}</div>
@@ -401,7 +412,7 @@ function viewSettings() {
     <h3>데이터</h3><div class="list">
       ${h.sample ? `<button class="srow danger" id="s-clear">샘플 지우기</button>` : `<button class="srow" id="s-load">샘플 불러오기</button>`}
       <button class="srow danger" id="s-reset">모든 데이터 지우기</button></div>
-    <p class="small muted" style="margin:4px 4px 0">데이터는 이 브라우저에만 저장됩니다. 형식은 데스크톱 앱의 stallmeter-data.json과 같습니다.</p>
+    <p class="small muted" style="margin:4px 4px 0">데이터는 이 브라우저에만 저장됩니다. 형식은 데스크톱 앱의 idletax-data.json과 같습니다.</p>
     <h3>정보</h3><div class="list">
       <div class="srow"><span class="grow">계산 엔진</span><span class="muted small num">core.py ${esc(about.version)} · Python ${esc(about.python)}</span></div>
       <div class="srow"><span class="grow">통화</span><span class="muted">${esc(about.currency)}</span></div>

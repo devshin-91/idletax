@@ -1,7 +1,7 @@
-"""Computes every number shown in the Figma mobile mock with StallMeter's own core.py.
+"""Computes every number shown in the Figma mobile mock with IdleTax's own core.py.
 
 The mock shows the Korean sample's subscriptions on Thursday 2026-11-19 at noon.
-Usage: python -X utf8 mobile_numbers.py <stallmeter folder> <out.json>
+Usage: python -X utf8 mobile_numbers.py <idletax folder> <out.json>
 """
 import json
 import sys

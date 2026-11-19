@@ -1,6 +1,6 @@
 **English** | [한국어](how-it-works.ko.md)
 
-# How StallMeter counts loss
+# How IdleTax counts loss
 
 ## Subscriptions
 
